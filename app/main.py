@@ -1,12 +1,14 @@
 import logging
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import psycopg
+
 from app.core.config import settings
 from app.features.auth.router import router as auth_router
-from app.features.roles.router import router as roles_router
 from app.features.empleados.router import router as empleados_router
+from app.features.roles.router import router as roles_router
+from app.features.usuarios.router import router as usuarios_router
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger("app")
 
@@ -23,6 +25,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(roles_router)
 app.include_router(empleados_router)
+app.include_router(usuarios_router)
 
 @app.exception_handler(psycopg.OperationalError)
 def operational_error_handler(request: Request, exc: psycopg.OperationalError):
