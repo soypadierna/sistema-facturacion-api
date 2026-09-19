@@ -11,6 +11,8 @@ from app.core.storage import upload_object, delete_object, build_foto_url
 
 logger = logging.getLogger("productos")
 
+Image.MAX_IMAGE_PIXELS = 25_000_000
+
 MAX_PHOTO_BYTES = 3 * 1024 * 1024
 MAX_SIDE = 800
 
@@ -68,6 +70,14 @@ def update_producto(idproducto: int, body, usuario: str):
         raise HTTPException(status_code=409, detail="No se pudo actualizar el producto")
     return _to_out(repository.get_by_id(idproducto))
 
+def _safe_delete(nombre: str | None) -> None:
+    if not nombre or nombre.startswith("http"):
+        return
+    try:
+        delete_object(nombre)
+    except Exception:
+        logger.warning("No se pudo borrar el objeto %s del storage", nombre)
+
 def delete_producto(idproducto: int):
     row = repository.get_by_id(idproducto)
     if not row:
@@ -76,38 +86,43 @@ def delete_producto(idproducto: int):
     if count > 0:
         raise HTTPException(status_code=409, detail=f"Producto usado en {count} factura(s)")
     strfoto = row[6]
-    repository.delete(idproducto)
-    if strfoto:
-        delete_object(strfoto)
+    try:
+        repository.delete(idproducto)
+    except psycopg.errors.ForeignKeyViolation:
+        raise HTTPException(status_code=409, detail="Producto usado en facturas")
+    _safe_delete(strfoto)
 
 def _process_image(raw: bytes) -> bytes:
     try:
         img = Image.open(BytesIO(raw))
         img.verify()
         img = Image.open(BytesIO(raw))
+
+        if img.format not in ("JPEG", "PNG", "WEBP"):
+            raise ValueError("Formato no soportado")
+
+        img = ImageOps.exif_transpose(img)
+
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            img = img.convert("RGBA")
+            background = Image.new("RGB", img.size, (255, 255, 255))
+            background.paste(img, mask=img.split()[-1])
+            img = background
+        else:
+            img = img.convert("RGB")
+
+        img.thumbnail((MAX_SIDE, MAX_SIDE), Image.LANCZOS)
+
+        out = BytesIO()
+        img.save(out, format="WEBP", quality=80)
+        return out.getvalue()
     except Exception:
         raise HTTPException(status_code=415, detail="El archivo no es una imagen válida")
-    if img.format not in ("JPEG", "PNG", "WEBP"):
-        raise HTTPException(status_code=415, detail="Formato no soportado (usa JPEG, PNG o WebP)")
-
-    img = ImageOps.exif_transpose(img)
-    img = img.convert("RGB")
-
-    w, h = img.size
-    if max(w, h) > MAX_SIDE:
-        ratio = MAX_SIDE / max(w, h)
-        img = img.resize((int(w * ratio), int(h * ratio)))
-
-    out = BytesIO()
-    img.save(out, format="WEBP", quality=80)
-    return out.getvalue()
 
 def upload_foto(idproducto: int, raw: bytes, usuario: str):
     row = repository.get_by_id(idproducto)
     if not row:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
-    if len(raw) > MAX_PHOTO_BYTES:
-        raise HTTPException(status_code=413, detail="La imagen supera el tamaño máximo de 3 MB")
 
     processed = _process_image(raw)
     nombre = f"{uuid4()}.webp"
@@ -115,20 +130,20 @@ def upload_foto(idproducto: int, raw: bytes, usuario: str):
     try:
         upload_object(nombre, processed)
     except Exception:
+        logger.exception("Fallo al subir imagen a Storage para idproducto=%s", idproducto)
         raise HTTPException(status_code=502, detail="No se pudo subir la imagen")
 
     old_foto = row[6]
     try:
         repository.update_foto(idproducto, nombre, usuario)
     except psycopg.errors.IntegrityError:
-        delete_object(nombre)
+        _safe_delete(nombre)
         raise HTTPException(status_code=409, detail="No se pudo actualizar el producto")
+    except Exception:
+        _safe_delete(nombre)
+        raise
 
-    if old_foto:
-        try:
-            delete_object(old_foto)
-        except Exception:
-            logger.warning("No se pudo borrar la foto anterior de idproducto=%s", idproducto)
+    _safe_delete(old_foto)
 
     return _to_out(repository.get_by_id(idproducto))
 
@@ -138,5 +153,4 @@ def delete_foto(idproducto: int, usuario: str):
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     strfoto = row[6]
     repository.update_foto(idproducto, None, usuario)
-    if strfoto:
-        delete_object(strfoto)
+    _safe_delete(strfoto)
