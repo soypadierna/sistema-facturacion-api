@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     PASSWORD_PEPPER: str
     JWT_EXPIRE_MINUTES: int = 480
     CORS_ORIGINS: str = "*"
+    SUPABASE_URL: str
+    SUPABASE_SERVICE_KEY: str
+    SUPABASE_STORAGE_BUCKET: str
 
     @field_validator("JWT_SECRET")
     @classmethod

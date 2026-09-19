@@ -1,7 +1,10 @@
-fastapi
-uvicorn[standard]
-psycopg[binary,pool]
-pyjwt
-pydantic-settings
-python-dotenv
 email-validator
+fastapi
+httpx
+pillow
+psycopg[binary,pool]
+pydantic-settings
+pyjwt
+python-dotenv
+python-multipart
+uvicorn[standard]
