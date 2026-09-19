@@ -25,6 +25,11 @@ class Settings(BaseSettings):
             raise ValueError("PASSWORD_PEPPER debe tener al menos 16 caracteres")
         return v
 
+    @field_validator("SUPABASE_URL")
+    @classmethod
+    def _strip_supabase_url(cls, v: str) -> str:
+        return v.rstrip("/")
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",")]

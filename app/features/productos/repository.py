@@ -82,13 +82,6 @@ def count_facturas_usando(idproducto: int) -> int:
         cur.execute(sql, (idproducto,))
         return cur.fetchone()[0]
 
-def get_strfoto(idproducto: int):
-    sql = "SELECT strfoto FROM tblproducto WHERE idproducto = %s"
-    with get_pool().connection() as conn, conn.cursor() as cur:
-        cur.execute(sql, (idproducto,))
-        row = cur.fetchone()
-        return row[0] if row else None
-
 def update_foto(idproducto: int, strfoto: str | None, usuario: str) -> None:
     sql = """
         UPDATE tblproducto
