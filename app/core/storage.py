@@ -13,6 +13,8 @@ def upload_object(nombre: str, content: bytes) -> None:
         "cache-control": "max-age=31536000",
     }
     resp = _client.post(url, headers=headers, content=content)
+    if resp.status_code >= 400:
+        print("SUPABASE STORAGE ERROR:", resp.status_code, resp.text)
     resp.raise_for_status()
 
 def delete_object(nombre: str) -> None:
