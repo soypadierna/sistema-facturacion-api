@@ -10,7 +10,7 @@ Backend en FastAPI (Python) para el sistema de facturación. Arquitectura por ca
 
 ## Arquitectura de carpetas
 
-sistema_facturacion_api/
+`sistema_facturacion_api/
 ├── app/
 │ ├── main.py # Punto de entrada: CORS, routers, exception handlers
 │ ├── core/
@@ -37,7 +37,7 @@ sistema_facturacion_api/
 │ # schemas.py -> modelos Pydantic (entrada/salida, camelCase)
 ├── requirements.txt
 ├── .env.example
-└── .env # (no versionado)
+└── .env # (no versionado)`
 
 
 ## Variables de entorno
