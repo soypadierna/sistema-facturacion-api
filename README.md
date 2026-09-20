@@ -48,6 +48,7 @@ sistema_facturacion_api/
 
 Copia `.env.example` a `.env` y completa:
 
+```text
 DATABASE_URL=postgresql://postgres.xxxx:TU_PASSWORD@aws-0-<region>.pooler.supabase.com:6543/postgres
 JWT_SECRET=<cadena aleatoria de al menos 32 caracteres>
 PASSWORD_PEPPER=<cadena aleatoria de al menos 16 caracteres>
@@ -56,7 +57,7 @@ CORS_ORIGINS=http://localhost:5173
 SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_KEY=<service_role key de Supabase>
 SUPABASE_STORAGE_BUCKET=<nombre del bucket para fotos de productos>
-
+```
 
 - `DATABASE_URL`: en Supabase → Settings → Database → Connection string → URI (usa el pooler en modo transacción, puerto 6543).
 - `JWT_SECRET` y `PASSWORD_PEPPER`: generar con `python -c "import secrets; print(secrets.token_hex(32))"`.
