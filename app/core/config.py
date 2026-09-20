@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
 
@@ -10,6 +11,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_SERVICE_KEY: str
     SUPABASE_STORAGE_BUCKET: str
+    IVA_PORCENTAJE: Decimal = Decimal("19")
 
     @field_validator("JWT_SECRET")
     @classmethod
