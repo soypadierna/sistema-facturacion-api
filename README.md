@@ -10,34 +10,38 @@ Backend en FastAPI (Python) para el sistema de facturación. Arquitectura por ca
 
 ## Arquitectura de carpetas
 
-`sistema_facturacion_api/
+```text
+sistema_facturacion_api/
 ├── app/
-│ ├── main.py # Punto de entrada: CORS, routers, exception handlers
-│ ├── core/
-│ │ ├── config.py # Configuración (variables de entorno)
-│ │ ├── db.py # Pool de conexiones a PostgreSQL
-│ │ ├── security.py # Hash de contraseñas, JWT
-│ │ ├── deps.py # Dependencias de FastAPI (auth, permisos)
-│ │ ├── permissions.py # Mapeo rol -> permisos
-│ │ └── storage.py # Cliente de Supabase Storage (fotos)
-│ └── features/
-│ ├── auth/ # Login, /auth/me
-│ ├── roles/ # CRUD de roles
-│ ├── empleados/ # CRUD de empleados (retiro/reactivación)
-│ ├── usuarios/ # Asignación de credenciales (tblseguridad)
-│ ├── categorias/ # CRUD de categorías de producto
-│ ├── productos/ # CRUD de productos + fotos
-│ ├── clientes/ # CRUD de clientes
-│ ├── facturas/ # Facturación (cálculo de totales, stock, estados)
-│ └── dashboard/ # Indicadores generales
-│ # cada feature contiene:
-│ # router.py -> define los endpoints HTTP
-│ # service.py -> reglas de negocio
-│ # repository.py -> SQL parametrizado (sin ORM)
-│ # schemas.py -> modelos Pydantic (entrada/salida, camelCase)
+│   ├── main.py # Punto de entrada: CORS, routers, exception handlers
+│   ├── core/
+│   │   ├── config.py # Configuración (variables de entorno)
+│   │   ├── db.py # Pool de conexiones a PostgreSQL
+│   │   ├── security.py # Hash de contraseñas, JWT
+│   │   ├── deps.py # Dependencias de FastAPI (auth, permisos)
+│   │   ├── permissions.py # Mapeo rol -> permisos
+│   │   └── storage.py # Cliente de Supabase Storage (fotos)
+│   └── features/
+│       ├── auth/ # Login, /auth/me
+│       ├── roles/ # CRUD de roles
+│       ├── empleados/ # CRUD de empleados (retiro/reactivación)
+│       ├── usuarios/ # Asignación de credenciales (tblseguridad)
+│       ├── categorias/ # CRUD de categorías de producto
+│       ├── productos/ # CRUD de productos + fotos
+│       ├── clientes/ # CRUD de clientes
+│       ├── facturas/ # Facturación (cálculo de totales, stock, estados)
+│       └── dashboard/ # Indicadores generales
+│
+│       # cada feature contiene:
+│       # router.py -> define los endpoints HTTP
+│       # service.py -> reglas de negocio
+│       # repository.py -> SQL parametrizado (sin ORM)
+│       # schemas.py -> modelos Pydantic (entrada/salida, camelCase)
+│
 ├── requirements.txt
 ├── .env.example
-└── .env # (no versionado)`
+└── .env # (no versionado)
+```
 
 
 ## Variables de entorno
