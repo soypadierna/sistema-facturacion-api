@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_KEY: str
     SUPABASE_STORAGE_BUCKET: str
     IVA_PORCENTAJE: Decimal = Decimal("19")
+    STOCK_BAJO_UMBRAL: int = 10
 
     @field_validator("JWT_SECRET")
     @classmethod
