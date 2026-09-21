@@ -7,4 +7,5 @@ pydantic-settings
 pyjwt
 python-dotenv
 python-multipart
+tzdata
 uvicorn[standard]

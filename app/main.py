@@ -8,6 +8,7 @@ from app.features.clientes.router import router as clientes_router
 from app.features.dashboard.router import router as dashboard_router
 from app.features.empleados.router import router as empleados_router
 from app.features.facturas.router import router as facturas_router
+from app.features.informes.router import router as informes_router
 from app.features.productos.router import router as productos_router
 from app.features.roles.router import router as roles_router
 from app.features.usuarios.router import router as usuarios_router
@@ -34,6 +35,7 @@ app.include_router(clientes_router)
 app.include_router(dashboard_router)
 app.include_router(empleados_router)
 app.include_router(facturas_router)
+app.include_router(informes_router)
 app.include_router(productos_router)
 app.include_router(roles_router)
 app.include_router(usuarios_router)

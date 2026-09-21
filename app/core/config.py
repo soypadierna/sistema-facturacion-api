@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     SUPABASE_STORAGE_BUCKET: str
     IVA_PORCENTAJE: Decimal = Decimal("19")
     STOCK_BAJO_UMBRAL: int = 10
+    APP_TIMEZONE: str = "America/Costa_Rica"
 
     @field_validator("JWT_SECRET")
     @classmethod
