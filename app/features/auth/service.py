@@ -1,9 +1,10 @@
-import logging
-import time
+from app.core.dates import is_retired
+from app.core.security import hash_password, verify_hashed, verify_plain, create_token
+from app.features.auth import repository
 from datetime import datetime, timezone
 from fastapi import HTTPException
-from app.features.auth import repository
-from app.core.security import hash_password, verify_hashed, verify_plain, create_token
+import logging
+import time
 
 logger = logging.getLogger("auth")
 
@@ -30,11 +31,6 @@ def _register_fail(usuario: str, ip: str):
     key = _rate_key(usuario, ip)
     _FAILS.setdefault(key, []).append(time.time())
 
-def _is_retired(dt) -> bool:
-    if dt is None:
-        return False
-    return dt <= datetime.now(timezone.utc).replace(tzinfo=None)
-
 def login(usuario: str, clave: str, ip: str) -> dict:
     _check_rate_limit(usuario, ip)
 
@@ -53,7 +49,7 @@ def login(usuario: str, clave: str, ip: str) -> dict:
         _register_fail(usuario, ip)
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
-    if _is_retired(dtmretiro):
+    if is_retired(dtmretiro):
         _register_fail(usuario, ip)
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
@@ -89,7 +85,7 @@ def get_me(idempleado: int) -> dict:
 
     idempleado, strnombre, dtmretiro, idrol, roldesc = rows[0]
 
-    if _is_retired(dtmretiro):
+    if is_retired(dtmretiro):
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
     return {

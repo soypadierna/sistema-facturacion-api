@@ -1,12 +1,8 @@
+from app.core.dates import is_retired
+from app.features.empleados import repository
 from datetime import datetime, timezone
 from fastapi import HTTPException
 import psycopg
-from app.features.empleados import repository
-
-def _is_retired(dt) -> bool:
-    if dt is None:
-        return False
-    return dt <= datetime.now(timezone.utc).replace(tzinfo=None)
 
 def _to_out(row: tuple) -> dict:
     (idempleado, nombre, documento, direccion, telefono, email, ingreso, retiro,
@@ -20,7 +16,7 @@ def _to_out(row: tuple) -> dict:
         "email": email,
         "ingreso": ingreso.date() if ingreso else None,
         "retiro": retiro.date() if retiro else None,
-        "retirado": _is_retired(retiro),
+        "retirado": is_retired(retiro),
         "datos_adicionales": datos_adicionales,
         "rol": {"id": idrol, "descripcion": roldesc} if idrol is not None else None,
     }
@@ -79,7 +75,7 @@ def reactivar_empleado(idempleado: int, usuario: str):
     row = repository.get_by_id(idempleado)
     if not row:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
-    if not _is_retired(row[7]):
+    if not is_retired(row[7]):
         raise HTTPException(status_code=409, detail="El empleado no está retirado")
     repository.reactivate(idempleado, usuario)
     return _to_out(repository.get_by_id(idempleado))
