@@ -7,9 +7,12 @@ class CamelModel(BaseModel):
 class RolOut(CamelModel):
     id: int
     descripcion: str
+    permisos: list[str]
 
 class RolCreate(BaseModel):
     descripcion: str = Field(min_length=1, max_length=50)
+    permisos: list[str] | None = None
 
 class RolUpdate(BaseModel):
     descripcion: str = Field(min_length=1, max_length=50)
+    permisos: list[str] | None = None

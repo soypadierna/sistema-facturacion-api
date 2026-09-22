@@ -1,17 +1,17 @@
-from app.core.dates import is_retired
-from app.core.permissions import ROLE_PERMISSIONS
-from app.core.security import decode_token
-from app.features.auth import repository as auth_repository
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from fastapi import Header, HTTPException, Depends
 import jwt
+from app.core.security import decode_token
+from app.core.permissions import get_permisos
+from app.core.dates import is_retired
+from app.features.auth import repository as auth_repository
 
 @dataclass
 class CurrentUser:
     id_empleado: int
     rol_id: int | None
     usuario: str
+    permisos: list[str]
 
 def get_current_user(authorization: str = Header(default="")) -> dict:
     headers = {"WWW-Authenticate": "Bearer"}
@@ -34,11 +34,11 @@ def require_permission(*perms: str):
         rows = auth_repository.get_by_idempleado(idempleado)
         if len(rows) == 0:
             raise HTTPException(status_code=401, detail="No autorizado", headers=headers)
-        _, _, dtmretiro, rol_id, _ = rows[0]
+        _, _, dtmretiro, rol_id, _, strpermisos = rows[0]
         if is_retired(dtmretiro):
             raise HTTPException(status_code=401, detail="No autorizado", headers=headers)
-        allowed = ROLE_PERMISSIONS.get(rol_id, [])
-        if not any(p in allowed for p in perms):
+        permisos = get_permisos(rol_id, strpermisos)
+        if not any(p in permisos for p in perms):
             raise HTTPException(status_code=403, detail="Sin permiso")
-        return CurrentUser(id_empleado=idempleado, rol_id=rol_id, usuario=usuario)
+        return CurrentUser(id_empleado=idempleado, rol_id=rol_id, usuario=usuario, permisos=permisos)
     return dependency

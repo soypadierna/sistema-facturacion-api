@@ -1,10 +1,10 @@
-from app.core.dates import is_retired
-from app.core.security import hash_password, verify_hashed, verify_plain, create_token
-from app.features.auth import repository
-from datetime import datetime, timezone
-from fastapi import HTTPException
 import logging
 import time
+from fastapi import HTTPException
+from app.features.auth import repository
+from app.core.security import hash_password, verify_hashed, verify_plain, create_token
+from app.core.dates import is_retired
+from app.core.permissions import get_permisos
 
 logger = logging.getLogger("auth")
 
@@ -43,7 +43,7 @@ def login(usuario: str, clave: str, ip: str) -> dict:
         _register_fail(usuario, ip)
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
-    idseguridad, strclave, idempleado, strnombre, dtmretiro, idrol, roldesc = rows[0]
+    idseguridad, strclave, idempleado, strnombre, dtmretiro, idrol, roldesc, strpermisos = rows[0]
 
     if not strclave:
         _register_fail(usuario, ip)
@@ -68,6 +68,7 @@ def login(usuario: str, clave: str, ip: str) -> dict:
     _FAILS.pop(_rate_key(usuario, ip), None)
 
     token, expires_in = create_token(idempleado, idrol, usuario)
+    permisos = get_permisos(idrol, strpermisos)
     return {
         "access_token": token,
         "expires_in": expires_in,
@@ -75,6 +76,7 @@ def login(usuario: str, clave: str, ip: str) -> dict:
             "id_empleado": idempleado,
             "nombre": strnombre,
             "rol": {"id": idrol, "descripcion": roldesc},
+            "permisos": permisos,
         },
     }
 
@@ -83,13 +85,15 @@ def get_me(idempleado: int) -> dict:
     if len(rows) == 0:
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
-    idempleado, strnombre, dtmretiro, idrol, roldesc = rows[0]
+    idempleado, strnombre, dtmretiro, idrol, roldesc, strpermisos = rows[0]
 
     if is_retired(dtmretiro):
         raise HTTPException(status_code=401, detail=GENERIC_ERROR)
 
+    permisos = get_permisos(idrol, strpermisos)
     return {
         "id_empleado": idempleado,
         "nombre": strnombre,
         "rol": {"id": idrol, "descripcion": roldesc},
+        "permisos": permisos,
     }

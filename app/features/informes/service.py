@@ -3,7 +3,6 @@ from decimal import Decimal, ROUND_HALF_UP
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
 from app.core.config import settings
-from app.core.permissions import ROLE_PERMISSIONS
 from app.features.informes import repository
 
 TIPOS_INFO = {
@@ -28,13 +27,12 @@ def _money(v) -> float:
     return float(d)
 
 def _has_access(user, tipo: str) -> bool:
-    permisos = ROLE_PERMISSIONS.get(user.rol_id, [])
-    if "informes" not in permisos:
+    if "informes" not in user.permisos:
         return False
     requerido = REPORT_ACCESS[tipo]
     if requerido is None:
         return user.rol_id == 1
-    return requerido in permisos
+    return requerido in user.permisos
 
 def list_tipos(user):
     result = []

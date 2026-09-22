@@ -1,14 +1,11 @@
 from decimal import Decimal, ROUND_HALF_UP
 from app.core.config import settings
-from app.core.permissions import ROLE_PERMISSIONS
 from app.features.dashboard import repository
 
 def _round2(v) -> Decimal:
     return Decimal(v).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-def get_dashboard(rol_id: int | None):
-    permisos = ROLE_PERMISSIONS.get(rol_id, [])
-
+def get_dashboard(permisos: list[str]):
     clientes = None
     if "clientes" in permisos:
         clientes = {"total": repository.count_clientes()}
