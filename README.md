@@ -74,7 +74,7 @@ git clone https://github.com/soypadierna/sistema-facturacion-api.git
 cd sistema-facturacion-api
 
 # 2. Crear entorno virtual (opcional pero recomendado)
-python -m venv venv
+python -3.12 -m venv venv
 venv\Scripts\activate        # Windows
 source venv/bin/activate     # Linux/Mac
 
